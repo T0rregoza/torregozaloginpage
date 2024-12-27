@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torregoza</title>
+    <style>
+        /* Disable scrolling and ensure background color is consistent */
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevent scrolling */
+            width: 100%;
+            height: 100%;
+            background-color: #1c1f1b; /* Dark green background */
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw; /* Ensure the container takes full viewport size */
+            background-color: #1c1f1b; /* Match body background */
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #4CAF50;
+            font-size: 50px;
+            margin: 0;
+        }
+
+        .header p {
+            font-size: 18px;
+            color: #c2c2c2;
+        }
+
+        #login-form {
+            background: #252a24;
+            padding: 20px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 350px; /* Add max-width to prevent overflow */
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-field {
+            margin: 10px 0;
+        }
+
+        .input-field input {
+            width: 100%;
+            padding: 12px;  /* Increased padding */
+            font-size: 16px;
+            border: 1px solid #4CAF50;
+            border-radius: 6px;
+            background-color: #333833;
+            color: #e8e8e8;
+            box-sizing: border-box; /* Ensures padding doesn't overflow */
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;  /* Increased padding */
+            background-color: #4CAF50;
+            color: #ffffff;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .logo-container {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translate(-50%, 0);
+            text-align: center;
+        }
+
+        .logo-container .welcome {
+            color: #00ff00;
+            font-size: 30px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00;
+            margin: 0;
+        }
+
+        .logo-container .torregoza {
+            color: #00ff00;
+            font-size: 60px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
+            margin: 0;
+            text-transform: uppercase;
+            animation: flicker 3s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% {
+                opacity: 0.8;
+                text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 15px #00ff00;
+            }
+            50% {
+                opacity: 1;
+                text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
+            }
+        }
+
+        .terminal {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            background-color: #252a24;
+            border: 1px solid #00ff00;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #00ff00;
+            overflow: auto;
+            max-height: 200px;
+        }
+
+        .terminal-input {
+            width: 100%;
+            background: none;
+            border: none;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Form Section -->
+    <div class="container" id="login-container">
+        <div class="header">
+            <h1>Torregoza</h1>
+            <p>Sign in to Torregoza, where we pretend to care about privacy.</p>
+        </div>
+        <div id="login-form">
+            <form onsubmit="validateLogin(event)">
+                <div class="input-field">
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                <div class="input-field">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit">Log In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Animation Section -->
+    <div id="animation-container" class="hidden">
+        <canvas id="matrix"></canvas>
+        <div class="logo-container">
+            <p class="welcome">Welcome</p>
+            <p class="torregoza">Torregoza</p>
+        </div>
+        <div class="terminal">
+            <p>Terminal Output:</p>
+            <div id="terminal-output"></div>
+            <input type="text" class="terminal-input" id="terminal-input" placeholder="Type a command...">
+        </div>
+    </div>
+
+    <script>
+        function validateLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === "admtorregoza" && password === "admtorregoza") {
+                // Hide login form and show animation
+                document.getElementById('login-container').classList.add('hidden');
+                document.getElementById('animation-container').classList.remove('hidden');
+
+                // Start animation
+                startMatrixEffect();
+                setupTerminal();
+            } else {
+                const roasts = [
+                    "Is your username 'admin' and your password 'wrong'? Because you failed both.",
+                    "Are you sure you’re even trying? Your login attempt is as effective as a screen door on a submarine.",
+                    "I’ve seen better passwords written on napkins. Try again, genius.",
+                    "Are you lost? Because your login credentials are definitely not found here.",
+                    "This isn't a guessing game, but you're winning at being wrong. Try harder."
+                ];
+                const randomRoast = roasts[Math.floor(Math.random() * roasts.length)];
+                alert(randomRoast);
+            }
+        }
+
+        function startMatrixEffect() {
+            const canvas = document.getElementById('matrix');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()';
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            const drops = Array.from({ length: Math.floor(columns) }, () => canvas.height);
+
+            function drawMatrix() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#00ff00';
+                ctx.font = `${fontSize}px 'Courier New', monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = letters[Math.floor(Math.random() * letters.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.95) {
+                        drops[i] = 0;
+                    }
+
+                    drops[i]++;
+                }
+
+                requestAnimationFrame(drawMatrix);
+            }
+
+            drawMatrix();
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+
+        function setupTerminal() {
+            const terminalInput = document.getElementById('terminal-input');
+            const terminalOutput = document.getElementById('terminal-output');
+
+            terminalInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const command = terminalInput.value.trim();
+                    terminalInput.value = '';
+                    processCommand(command, terminalOutput);
+                }
+            });
+        }
+
+        function processCommand(command, outputElement) {
+            let response;
+
+            switch (command.toLowerCase()) {
+                case 'help':
+                    response = 'Available commands: help, clear, about';
+                    break;
+                case 'about':
+                    response = 'Torregoza: We have no idea what we’re doing, but it looks cool, right?';
+                    break;
+                case 'clear':
+                    outputElement.innerHTML = '';
+                    return;
+                default:
+                    response = `Unknown command: "${command}". Type "help" for assistance.`;
+            }
+
+            outputElement.innerHTML += `<p>${response}</p>`;
+            outputElement.scrollTop = outputElement.scrollHeight;
+        }
+    </script>
+</body>
+</html>
